@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Unknot
 
-## Getting Started
+A zero-friction capture and organization tool for language learners. Dump raw notes during class, and let AI unknot them into structured vocabulary and flashcards.
 
-First, run the development server:
+**Core loop:** Buffer → Unknot → Flashcards
+
+## Quick Start
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Start all services (Postgres, Redis, Next.js app)
+docker compose up -d
+
+# Push database schema
+DATABASE_URL=postgresql://unknot:unknot@localhost:5434/unknot pnpm db:push
+
+# Seed sample data (optional)
+DATABASE_URL=postgresql://unknot:unknot@localhost:5434/unknot pnpm db:seed
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Prerequisites
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Docker Desktop
+- Node.js 20+
+- pnpm (`npm install -g pnpm`)
 
-## Learn More
+## Environment Variables
 
-To learn more about Next.js, take a look at the following resources:
+Copy `.env.example` to `.env.local` and fill in:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | Yes | Postgres connection string |
+| `REDIS_URL` | Yes | Redis connection string |
+| `AUTH_SECRET` | Yes | Random secret for Auth.js sessions |
+| `AUTH_RESEND_KEY` | Yes | Resend API key for magic link emails |
+| `OPENAI_API_KEY` | For AI | OpenAI key (or swap provider in `src/lib/ai/provider.ts`) |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Development (without Docker)
 
-## Deploy on Vercel
+```bash
+# Start Postgres + Redis only
+docker compose up db redis -d
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Install dependencies
+pnpm install
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Run dev server
+pnpm dev
+```
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `pnpm dev` | Start Next.js dev server |
+| `pnpm build` | Production build |
+| `pnpm test` | Run tests (Vitest) |
+| `pnpm lint` | Lint with Biome |
+| `pnpm format` | Format with Biome |
+| `pnpm db:push` | Push Drizzle schema to database |
+| `pnpm db:seed` | Seed sample data |
+| `pnpm db:studio` | Open Drizzle Studio |
+
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router, Turbopack)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS 4
+- **API:** tRPC v11
+- **Auth:** Auth.js v5 (magic link via Resend)
+- **ORM:** Drizzle ORM
+- **Database:** PostgreSQL
+- **AI:** Vercel AI SDK (provider-agnostic)
+- **SRS:** ts-fsrs (spaced repetition)
+- **Testing:** Vitest
+- **Linting:** Biome
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── (auth)/login/          # Magic link login
+│   ├── (app)/                 # Protected routes
+│   │   ├── buffer/            # Note capture
+│   │   ├── library/           # Past notes
+│   │   ├── study/             # Flashcard SRS deck
+│   │   ├── cards/             # Card management
+│   │   ├── settings/          # User settings
+│   │   └── onboarding/        # First-time setup
+│   └── api/
+│       ├── trpc/[trpc]/       # tRPC handler
+│       └── auth/[...nextauth]/ # Auth.js handler
+├── server/
+│   ├── trpc/routers/          # notes, unknot, cards, users
+│   └── db/                    # Drizzle schema, client, seed
+├── lib/
+│   ├── ai/                    # AI provider + unknot prompt
+│   ├── srs/                   # FSRS wrapper
+│   └── trpc/                  # tRPC client
+└── components/
+    ├── layout/                # TopNav, BottomTabs, ThemeToggle
+    └── providers/             # TRPCProvider
+```
