@@ -7,21 +7,27 @@ A zero-friction capture and organization tool for language learners. Dump raw no
 ## Quick Start
 
 ```bash
-# Start all services (Postgres, Redis, Next.js app)
-docker compose up -d
+# Install dependencies
+pnpm install
+
+# Create database (requires local Postgres)
+createdb unknot
 
 # Push database schema
-DATABASE_URL=postgresql://unknot:unknot@localhost:5434/unknot pnpm db:push
+pnpm db:push
 
 # Seed sample data (optional)
-DATABASE_URL=postgresql://unknot:unknot@localhost:5434/unknot pnpm db:seed
+pnpm db:seed
+
+# Run dev server
+pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
 
 ## Prerequisites
 
-- Docker Desktop
+- PostgreSQL 16+ (Homebrew: `brew install postgresql@16 && brew services start postgresql@16`)
 - Node.js 20+
 - pnpm (`npm install -g pnpm`)
 
@@ -31,24 +37,10 @@ Copy `.env.example` to `.env.local` and fill in:
 
 | Variable | Required | Description |
 |---|---|---|
-| `DATABASE_URL` | Yes | Postgres connection string |
-| `REDIS_URL` | Yes | Redis connection string |
+| `DATABASE_URL` | Yes | Postgres connection string (default: `postgresql://localhost:5432/unknot`) |
 | `AUTH_SECRET` | Yes | Random secret for Auth.js sessions |
 | `AUTH_RESEND_KEY` | Yes | Resend API key for magic link emails |
 | `OPENAI_API_KEY` | For AI | OpenAI key (or swap provider in `src/lib/ai/provider.ts`) |
-
-## Development (without Docker)
-
-```bash
-# Start Postgres + Redis only
-docker compose up db redis -d
-
-# Install dependencies
-pnpm install
-
-# Run dev server
-pnpm dev
-```
 
 ## Scripts
 

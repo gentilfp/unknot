@@ -10,10 +10,10 @@
     "format": "biome format --write .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "db:push": "drizzle-kit push",
-    "db:seed": "npx tsx src/server/db/seed.ts",
-    "db:generate": "drizzle-kit generate",
-    "db:studio": "drizzle-kit studio"
+    "db:push": "dotenv -e .env.local -- drizzle-kit push",
+    "db:seed": "dotenv -e .env.local -- tsx src/server/db/seed.ts",
+    "db:generate": "dotenv -e .env.local -- drizzle-kit generate",
+    "db:studio": "dotenv -e .env.local -- drizzle-kit studio"
   },
   "dependencies": {
     "@ai-sdk/openai": "^1.0.0",
@@ -53,6 +53,7 @@
     "@types/pg": "^8.11.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv-cli": "^11.0.0",
     "drizzle-kit": "^0.31.0",
     "tailwindcss": "^4",
     "tsx": "^4.0.0",

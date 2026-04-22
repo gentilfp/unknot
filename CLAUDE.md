@@ -12,7 +12,6 @@ Language learning capture tool. See `product.md` for product spec, `tech.md` for
 - Vercel AI SDK (provider-agnostic, default: OpenAI)
 - ts-fsrs (spaced repetition)
 - Vitest (testing) + Biome (linting/formatting)
-- Docker Compose (Postgres on 5434, Redis on 6379, app on 3000)
 
 ## Key Conventions
 
@@ -25,37 +24,29 @@ Language learning capture tool. See `product.md` for product spec, `tech.md` for
 - **Database schema** in `src/server/db/schema.ts` — use `pnpm db:push` to sync
 - **Seed data** via `pnpm db:seed` — creates dev user `dev@unknot.app` with sample German flashcards
 
-## Docker-First Development
+## Development
 
-All development runs through Docker Compose. Always ensure containers are running before executing commands.
+Run the app locally with `pnpm dev`. Requires local PostgreSQL.
 
 ```bash
-# Start everything (app + Postgres + Redis)
-docker compose up -d
-
-# Stop everything
-docker compose down
-
-# Rebuild after dependency changes
-docker compose build app && docker compose up -d
+# Run dev server
+pnpm dev
 ```
 
-App runs inside Docker at `localhost:3000`. Database at `localhost:5434`. Redis at `localhost:6379`.
+App runs locally at `localhost:3000`. Database at `localhost:5432`.
 
 ## Commands
 
-All commands should be run from the host (they connect to Docker services via `DATABASE_URL` in `.env.local`):
-
 ```bash
-pnpm dev          # Dev server (or use docker compose up for full stack)
+pnpm dev          # Dev server (local)
 pnpm build        # Production build
 pnpm test         # Vitest
 pnpm lint         # Biome check
-pnpm db:push      # Push schema to Postgres (requires Docker db running)
-pnpm db:seed      # Seed dev data (requires Docker db running)
+pnpm db:push      # Push schema to Postgres (requires local Postgres running)
+pnpm db:seed      # Seed dev data (requires local Postgres running)
 ```
 
-When running `db:push` or `db:seed` from host, ensure `DATABASE_URL=postgresql://unknot:unknot@localhost:5434/unknot` is set (already in `.env.local`).
+`DATABASE_URL=postgresql://localhost:5432/unknot` is set in `.env.local`.
 
 ## Deferred Features
 
